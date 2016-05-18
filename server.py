@@ -17,23 +17,24 @@ while 1:
         data = conn.recv(BUFFER_SIZE)
         if not data: break
         mystring = data.split(",")
-    if mystring[0] == "get_file":
-        filename = mystring[1]+'.wav'
-        wavGen.wavGen(filename,"rand")
-        s.send("send_file,name,size," +filename+ "," + str(os.stat(filename).st_size))
-        f = open(filename,'rb')
-        print 'Sending...'
-        l = f.read(1024)
-        while (l):
+        if mystring[0] == "get_file":
+            filename = mystring[1]+'.wav'
+            wavGen.wavGen(filename,"rand")
+            print("send_file," +filename+ "," + str(os.stat(filename).st_size))
+            conn.sendall("send_file," +filename+ "," + str(os.stat(filename).st_size))
+            f = open(filename,'rb')
             print 'Sending...'
-            s.send(l)
             l = f.read(1024)
-        f.close()
-        print "Done Sending"
-        print s.recv(1024)
-    #for s in mystring:
-    #    print s
-    #print "mystring[0]:", mystring[0]
-    #data = "server echo : " + data
-    conn.send("ok")  # echo
+            while (l):
+                print 'Sending...'
+                conn.sendall(l)
+                l = f.read(1024)
+            f.close()
+            print "Done Sending"
+            print conn.recv(1024)
+        #for s in mystring:
+        #    print s
+        #print "mystring[0]:", mystring[0]
+        #data = "server echo : " + data
+        conn.send("ok")  # echo
 conn.close()
