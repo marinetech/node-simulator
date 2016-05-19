@@ -11,7 +11,7 @@ def sine(frequency=440, length=60, rate=44100):
 def wavGen(name,func):
     if (name != ""):
         if (func == "sine"):
-            data = sine() # np.random.uniform(-1,1,44100) # 44100 random samples between -1 and 1
+            data = np.sin(np.arange(int(60 * 44100)) * float(440) * (math.pi * 2) / 44100) # sine # np.random.uniform(-1,1,44100) # 44100 random samples between -1 and 1
         else:
             data = np.random.uniform(-1,1,44100) # 44100 random samples between -1 and 1
     else:
