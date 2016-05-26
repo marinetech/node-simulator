@@ -1,14 +1,32 @@
 import socket
+import numpy as np
 import wavGen
 import os
+import time
 
 TCP_IP = '127.0.0.1'
 TCP_PORT = 44444
 BUFFER_SIZE = 20  # Normally 1024, but we want fast response
 
+def sendFile(filename):
+    print "send_file," + filename + "," + str(os.stat(filename).st_size)
+    size = str(os.stat(filename).st_size)
+    conn.sendall("send_file," + filename + "," + size + ",1")
+    f = open(filename,'rb')
+    print 'Sending...'
+    l = f.read(BUFFER_SIZE)
+    while (l):
+        print 'Sending...'
+        conn.send(l)
+        l = f.read(BUFFER_SIZE)
+    f.close()
+    print "Done Sending"
+    # print conn.recv(1024)
+
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
+
 while 1:
     conn, addr = s.accept()
     print 'Connection address:', addr
@@ -24,20 +42,19 @@ while 1:
             print cmd
             filename = mystring[1]+'.wav'
             wavGen.wavGen(filename,"rand")
-            s.sendall("send_file,name,size," + filename + "," + str(os.stat(filename).st_size))
-            f = open(filename,'rb')
-            print 'Sending...'
-            l = f.read(1024)
-            while (l):
-                print 'Sending...'
-                s.send(l)
-                l = f.read(1024)
-            f.close()
-            print "Done Sending"
-            print s.recv(1024)
+            sendFile(filename)
+
             #get_file,name,delete: the get_file message requires a file to the node (name of the file required, delete flag, if 1 erase it after sending, otherwise if 0 not). The node answer with OK, then with the send_file command before sending the file.
         elif (cmd == "get_data"):
-            print cmd
+            #for value in np.random.uniform(1,100):
+            value = int(np.ceil(np.random.uniform(1,100)))
+            filename = str(value) +'.wav'
+            print filename
+            if (value % 17 == 0):
+                wavGen.wavGen(filename,"sine")
+            else:
+                wavGen.wavGen(filename,"rand")
+            sendFile(filename)
             #get_data,delete: the get_data message: get whatever data has been recorded. (delete flag, if 1 erase it after sending, if 0 not ). Before each file the node sends the corresponding send_file command.
         elif (cmd == "set_power"):
             print cmd
@@ -61,7 +78,13 @@ while 1:
             #     2 (both) do both the operations together
             # )
         elif (cmd == "get_rt_data"):
+            print "cmd"
             print cmd
+            print "string"
+            print mystring
+            data = conn.recv(BUFFER_SIZE)
+            if not data: break
+            mystring = data.split(",")
         #     get_rt_data,sens_t,cum_id,starting_time,duration,chunck_duration,delete: the get_rt_data message ask the node to record and send the data in real time, divided them in chunck of fixed time length. The node before to send each chunck, sends an IDENTIFIER (e.g. UNIX EPOCH). (cum_id cumulative list of the senseors IDs used to record the audio, sens_t of the sensors that have to record the data:
         #         1 --> hydrophone,
         #         2 --> camera
@@ -96,7 +119,7 @@ while 1:
         elif (cmd == "delete_all_sent"):
             print cmd
         else:
-            print "unknown command"
+            print "unknown command : " +', '.join(mystring)
             # delete_all_sent: the delete_all_rec message. This message delete the files sent to the node
 
 
