@@ -191,6 +191,16 @@ while 1:
             """
             print cmd
             sendACK()
+        elif (cmd == "run_script"):
+            """
+            # Run a script
+            """
+            print cmd
+            data = data + conn.recv(BUFFER_SIZE)
+            if not data: break
+            mystring = data.split(",")
+            print mystring
+            sendACK()
         else:
             '''
             # report error and proceed
