@@ -6,24 +6,27 @@ import time
 
 TCP_IP = '127.0.0.1'
 TCP_PORT = 44444
-BUFFER_SIZE = 20  # Normally 1024, but we want fast response
+BUFFER_SIZE = 64  # Normally 1024, but we want fast command response, power of 2
+FILE_BUFFER_SIZE = 128  
 
 def sendACK():
     conn.sendall("OK")
 
 def sendFile(filename):
     sendACK()
+    time.sleep(0.1)
     size = str(os.stat(filename).st_size)
     sendFileString = "send_file," + filename + "," + size
     print sendFileString
     conn.sendall(sendFileString)
+    time.sleep(0.1)
     f = open(filename,'rb')
     print 'Sending...'
-    l = f.read(BUFFER_SIZE)
+    l = f.read(FILE_BUFFER_SIZE)
     while (l):
         # print 'Sending...'
         conn.send(l)
-        l = f.read(BUFFER_SIZE)
+        l = f.read(FILE_BUFFER_SIZE)
     f.close()
     os.remove(filename)
     print "Done Sending"
@@ -44,10 +47,11 @@ while 1:
 
         if (cmd == "send_file"):
             """
-            Anounce to the bouy that a file is going to be send
+            Anounce from the bouy that a file is going to be send
             #send_file,name,size: the send_file message(name of the file, size of the file in bytes)
             """
             print cmd
+            sendACK()
 
         elif (cmd == "get_file"):
             """
@@ -123,8 +127,8 @@ while 1:
             """
             print "cmd"
             print cmd
-            data = data + conn.recv(BUFFER_SIZE)
-            if not data: break
+            # data = data + conn.recv(BUFFER_SIZE)
+            # if not data: break
             mystring = data.split(",")
             print mystring
             if (mystring[1] == '1'):
@@ -196,8 +200,8 @@ while 1:
             # Run a script
             """
             print cmd
-            data = data + conn.recv(BUFFER_SIZE)
-            if not data: break
+            # data = data + conn.recv(BUFFER_SIZE)
+            # if not data: break
             mystring = data.split(",")
             print mystring
             sendACK()
