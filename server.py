@@ -7,7 +7,7 @@ import time
 TCP_IP = '127.0.0.1'
 TCP_PORT = 44444
 BUFFER_SIZE = 64  # Normally 1024, but we want fast command response, power of 2
-FILE_BUFFER_SIZE = 128  
+FILE_BUFFER_SIZE = 128
 
 def sendACK():
     conn.sendall("OK\r\n")
@@ -28,6 +28,7 @@ def sendFile(filename):
         l = f.read(FILE_BUFFER_SIZE)
     f.close()
     os.remove(filename)
+    conn.sendall("\n") # EOF
     print "Done Sending"
     # time.sleep(0.1)
     # print conn.recv(1024)
@@ -142,14 +143,15 @@ while 1:
                     cum_id = "{0:80b}".format(int(mystring[2]))
                     print cum_id.ljust(8,'0')
                     for chunk in range(int(mystring[4])):
-                        value = int(time.time() * 1000)
+                        value = int(round(time_.time() * 1000))
                         filename = str(value) +'.wav'
                         print filename
-                        if (value % 17 == 0):
+                        if (chunk == 20 or chunk == 21):
                             wavGen.wavGen(filename,"sine",int(mystring[5]))
                         else:
                             wavGen.wavGen(filename,"rand",int(mystring[5]))
                         sendFile(filename)
+                        time.sleep(0.5)
                 else:
                     sendACK()
             elif (cmd == "get_status"):
