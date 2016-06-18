@@ -28,7 +28,7 @@ def sendFile(filename):
         l = f.read(FILE_BUFFER_SIZE)
     f.close()
     os.remove(filename)
-    conn.sendall("\n") # EOF
+    conn.sendall("\r\n") # EOF
     print "Done Sending"
     # time.sleep(0.1)
     # print conn.recv(1024)
@@ -76,7 +76,7 @@ while 1:
                 get_data,delete: the get_data message: get whatever data has been recorded. (delete flag, if 1 erase it after sending, if 0 not ).
                 Before each file the node sends the corresponding send_file command.
                 """
-                for value in np.random.uniform(1,12):
+                for value in range(int(np.ceil(np.random.uniform(1,12)))):
                     value = int(np.ceil(np.random.uniform(1,100)))
                     filename = str(value) +'.wav'
                     print filename
@@ -136,14 +136,14 @@ while 1:
                 print cmd
                 # data = data + conn.recv(BUFFER_SIZE)
                 # if not data: break
-                mystring = data.split(",")
+                mystring = command.split(",")
                 print mystring
                 if (mystring[1] == '1'):
                     # hydrophone
                     cum_id = "{0:80b}".format(int(mystring[2]))
                     print cum_id.ljust(8,'0')
                     for chunk in range(int(mystring[4])):
-                        value = int(round(time_.time() * 1000))
+                        value = int(round(time.time() * 1000))
                         filename = str(value) +'.wav'
                         print filename
                         if (chunk == 20 or chunk == 21):
@@ -210,7 +210,7 @@ while 1:
                 print cmd
                 # data = data + conn.recv(BUFFER_SIZE)
                 # if not data: break
-                mystring = data.split(",")
+                mystring = command.split(",")
                 print mystring
                 sendACK()
             else:
