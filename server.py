@@ -66,7 +66,7 @@ while 1:
                 """
                 print cmd
 
-                filename = mystring[1]+'.wav'
+                filename = mystring[1]
                 wavGen.wavGen(filename,"rand")
                 sendFile(filename)
 
